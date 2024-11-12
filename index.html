@@ -26,7 +26,7 @@
             height: auto;
         }
 
-        button, input {
+        button {
             margin: 5px;
             padding: 10px 15px;
             font-size: 16px;
@@ -38,31 +38,21 @@
             background-color: #ccc;
             color: #666;
         }
-
-        input[type="text"] {
-            padding: 8px;
-            width: 200px;
-        }
     </style>
 </head>
 <body>
-    <h1>TTD Generator</h1>
+    <h1>Silahkan TTD</h1>
     <div class="signature-container">
         <canvas id="signatureCanvas"></canvas>
     </div>
-    <input type="text" id="nameInput" placeholder="Masukkan nama Anda">
-    <button id="addNameButton">Tambahkan Nama</button>
+    <h2>@copyright 2024 Design byImandriFatur</h2>
     <button id="clearButton">Clear</button>
     <button id="downloadButton" disabled>Download</button>
-    <h2>@copy 2024 imandrifatur</h2>
-
     <script>
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
         let hasSignature = false; // Flag untuk mengecek tanda tangan
-        let lastX = 0; // Posisi terakhir X
-        let lastY = 0; // Posisi terakhir Y
 
         // Atur lebar canvas agar sesuai dengan lebar container atau layar
         function resizeCanvas() {
@@ -97,8 +87,6 @@
             ctx.beginPath();
             const pos = getMousePos(event);
             ctx.moveTo(pos.x, pos.y);
-            lastX = pos.x; // Simpan posisi terakhir
-            lastY = pos.y;
         }
 
         function draw(event) {
@@ -108,8 +96,6 @@
             ctx.stroke();
             hasSignature = true; // Tandai bahwa canvas memiliki tanda tangan
             document.getElementById('downloadButton').disabled = false; // Aktifkan tombol download
-            lastX = pos.x; // Update posisi terakhir
-            lastY = pos.y;
         }
 
         function stopDrawing() {
@@ -150,23 +136,6 @@
             link.download = 'signature.png';
             link.href = canvas.toDataURL();
             link.click();
-        });
-
-        document.getElementById('addNameButton').addEventListener('click', () => {
-            const name = document.getElementById('nameInput').value;
-            if (!name) {
-                alert('Masukkan nama sebelum menambahkan.');
-                return;
-            }
-            ctx.font = '18px Arial';
-            ctx.fillStyle = '#000';
-
-            // Posisi nama di bawah tanda tangan (disesuaikan)
-            const textX = lastX - 20; // Sesuaikan agar nama muncul sedikit ke kiri
-            const textY = lastY + 30; // Sesuaikan agar nama muncul di bawah
-            const adjustedY = textY > canvas.height ? canvas.height - 10 : textY; // Pastikan tidak keluar batas
-            ctx.fillText(name, textX, adjustedY);
-            hasSignature = true; // Tandai bahwa canvas memiliki konten
         });
     </script>
 </body>
