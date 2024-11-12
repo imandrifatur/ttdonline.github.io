@@ -5,192 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TTD Generator</title>
     <style>
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-.signature-container {
-    border: 2px solid #000;
-    margin-bottom: 10px;
-}
+        .signature-container {
+            border: 2px solid #000;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
 
-canvas {
-    cursor: crosshair;
-    max-width: 100%;
-    height: auto;
-}
+        canvas {
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+        }
 
-button, input, select {
-    margin: 5px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-}
+        button, input {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
 
-input, select {
-    width: 100%;
-    max-width: 200px;
-}
+        button:disabled {
+            cursor: not-allowed;
+            background-color: #ccc;
+            color: #666;
+        }
 
-@media (max-width: 600px) {
-    body {
-        margin: 10px;
-    }
-
-    canvas {
-        width: 100%;
-        height: auto;
-    }
-
-    button, input, select {
-        font-size: 14px;
-        padding: 8px 12px;
-    }
-
-    .signature-container {
-        width: 100%;
-    }
-}
-
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
     <h1>TTD Generator</h1>
     <div class="signature-container">
-        <canvas id="signatureCanvas" width="500" height="200"></canvas>
+        <canvas id="signatureCanvas"></canvas>
     </div>
-    <input type="text" id="textInput" placeholder="Masukkan tulisan">
-    <select id="fontStyle">
-        <option value="Arial">Arial</option>
-        <option value="Verdana">Verdana</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Times New Roman">Times New Roman</option>
-    </select>
-    <button id="addTextButton">Tambahkan Tulisan</button>
+    <input type="text" id="nameInput" placeholder="Masukkan nama Anda">
+    <button id="addNameButton">Tambahkan Nama</button>
     <button id="clearButton">Clear</button>
-    <button id="downloadButton">Download</button>
-   <script>
-   const canvas = document.getElementById('signatureCanvas');
-const ctx = canvas.getContext('2d');
-let isDrawing = false;
-let hasSignature = false;
-let lastX = 0;
-let lastY = 0;
+    <button id="downloadButton" disabled>Download</button>
+    <h2>@copy 2024 imandrifatur</h2>
 
-// Set initial style for canvas
-ctx.strokeStyle = '#000';
-ctx.lineWidth = 2;
-ctx.lineJoin = 'round';
-ctx.lineCap = 'round';
+    <script>
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false; // Flag untuk mengecek tanda tangan
+        let lastX = 0; // Posisi terakhir X
+        let lastY = 0; // Posisi terakhir Y
 
-// Resize canvas based on window size
-function resizeCanvas() {
-    const containerWidth = document.querySelector('.signature-container').clientWidth;
-    canvas.width = containerWidth;
-    canvas.height = containerWidth / 2;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // Call once to set initial size
+        // Atur lebar canvas agar sesuai dengan lebar container atau layar
+        function resizeCanvas() {
+            const container = document.querySelector('.signature-container');
+            canvas.width = container.clientWidth;
+            canvas.height = 200; // Tinggi default yang disesuaikan, dapat diubah jika diperlukan
+        }
 
-// Event listeners for mouse and touch input
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseleave', stopDrawing);
+        // Panggil fungsi untuk menetapkan ukuran awal
+        resizeCanvas();
 
-canvas.addEventListener('touchstart', (e) => startDrawing(e), { passive: true });
-canvas.addEventListener('touchmove', (e) => draw(e), { passive: true });
-canvas.addEventListener('touchend', stopDrawing);
+        // Tambahkan event listener untuk merespons perubahan ukuran layar
+        window.addEventListener('resize', resizeCanvas);
 
-// Start drawing function
-function startDrawing(event) {
-    isDrawing = true;
-    ctx.beginPath();
-    const pos = getMousePos(event);
-    ctx.moveTo(pos.x, pos.y);
-    lastX = pos.x;
-    lastY = pos.y;
-}
+        // Set initial style for canvas
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
 
-// Draw function
-function draw(event) {
-    if (!isDrawing) return;
-    const pos = getMousePos(event);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
-    hasSignature = true; // Mark that canvas has content
-}
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
 
-// Stop drawing function
-function stopDrawing() {
-    isDrawing = false;
-    ctx.closePath();
-}
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
 
-// Get mouse/touch position
-function getMousePos(event) {
-    const rect = canvas.getBoundingClientRect();
-    let clientX, clientY;
+        function startDrawing(event) {
+            isDrawing = true;
+            ctx.beginPath();
+            const pos = getMousePos(event);
+            ctx.moveTo(pos.x, pos.y);
+            lastX = pos.x; // Simpan posisi terakhir
+            lastY = pos.y;
+        }
 
-    if (event.touches) {
-        clientX = event.touches[0].clientX;
-        clientY = event.touches[0].clientY;
-    } else {
-        clientX = event.clientX;
-        clientY = event.clientY;
-    }
+        function draw(event) {
+            if (!isDrawing) return;
+            const pos = getMousePos(event);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            hasSignature = true; // Tandai bahwa canvas memiliki tanda tangan
+            document.getElementById('downloadButton').disabled = false; // Aktifkan tombol download
+            lastX = pos.x; // Update posisi terakhir
+            lastY = pos.y;
+        }
 
-    return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-    };
-}
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.closePath();
+        }
 
-// Clear canvas button
-document.getElementById('clearButton').addEventListener('click', () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    hasSignature = false; // Reset the flag
-});
+        function getMousePos(event) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
 
-// Download signature button
-document.getElementById('downloadButton').addEventListener('click', () => {
-    if (!hasSignature) {
-        alert('Tidak ada tanda tangan untuk diunduh.');
-        return;
-    }
-    const link = document.createElement('a');
-    link.download = 'signature.png';
-    link.href = canvas.toDataURL();
-    link.click();
-});
+            if (event.touches) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
 
-// Add text button
-document.getElementById('addTextButton').addEventListener('click', () => {
-    const textInput = document.getElementById('textInput').value;
-    const fontStyle = document.getElementById('fontStyle').value;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-    if (textInput) {
-        ctx.font = `24px ${fontStyle}`;
-        ctx.fillStyle = '#000';
+        document.getElementById('clearButton').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false; // Reset flag
+            document.getElementById('downloadButton').disabled = true; // Nonaktifkan tombol download
+        });
 
-        // Position text below the last drawn signature point
-        const textX = Math.max(0, lastX - 20); // Ensure text does not go off the left edge
-        const textY = Math.min(canvas.height - 10, lastY + 30); // Ensure text does not go off the bottom edge
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            if (!hasSignature) {
+                alert('Tidak ada tanda tangan untuk diunduh.');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = 'signature.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
 
-        ctx.fillText(textInput, textX, textY);
-        hasSignature = true; // Mark that canvas has content
-    } else {
-        alert('Masukkan teks sebelum menambahkan.');
-    }
-});
+        document.getElementById('addNameButton').addEventListener('click', () => {
+            const name = document.getElementById('nameInput').value;
+            if (!name) {
+                alert('Masukkan nama sebelum menambahkan.');
+                return;
+            }
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#000';
 
-   </script>
+            // Posisi nama di bawah tanda tangan (disesuaikan)
+            const textX = lastX - 20; // Sesuaikan agar nama muncul sedikit ke kiri
+            const textY = lastY + 30; // Sesuaikan agar nama muncul di bawah
+            const adjustedY = textY > canvas.height ? canvas.height - 10 : textY; // Pastikan tidak keluar batas
+            ctx.fillText(name, textX, adjustedY);
+            hasSignature = true; // Tandai bahwa canvas memiliki konten
+        });
+    </script>
 </body>
 </html>
