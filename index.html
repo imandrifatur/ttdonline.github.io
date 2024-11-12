@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTD Generator</title>
+    <style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.signature-container {
+    border: 2px solid #000;
+    margin-bottom: 10px;
+}
+
+canvas {
+    cursor: crosshair;
+    max-width: 100%;
+    height: auto;
+}
+
+button, input, select {
+    margin: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+input, select {
+    width: 100%;
+    max-width: 200px;
+}
+
+@media (max-width: 600px) {
+    body {
+        margin: 10px;
+    }
+
+    canvas {
+        width: 100%;
+        height: auto;
+    }
+
+    button, input, select {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .signature-container {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <h1>TTD Generator</h1>
+    <div class="signature-container">
+        <canvas id="signatureCanvas" width="500" height="200"></canvas>
+    </div>
+    <input type="text" id="textInput" placeholder="Masukkan tulisan">
+    <select id="fontStyle">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Times New Roman">Times New Roman</option>
+    </select>
+    <button id="addTextButton">Tambahkan Tulisan</button>
+    <button id="clearButton">Clear</button>
+    <button id="downloadButton">Download</button>
+   <script>
+   const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let hasSignature = false;
+let lastX = 0;
+let lastY = 0;
+
+// Set initial style for canvas
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 2;
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+
+// Resize canvas based on window size
+function resizeCanvas() {
+    const containerWidth = document.querySelector('.signature-container').clientWidth;
+    canvas.width = containerWidth;
+    canvas.height = containerWidth / 2;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Call once to set initial size
+
+// Event listeners for mouse and touch input
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseleave', stopDrawing);
+
+canvas.addEventListener('touchstart', (e) => startDrawing(e), { passive: true });
+canvas.addEventListener('touchmove', (e) => draw(e), { passive: true });
+canvas.addEventListener('touchend', stopDrawing);
+
+// Start drawing function
+function startDrawing(event) {
+    isDrawing = true;
+    ctx.beginPath();
+    const pos = getMousePos(event);
+    ctx.moveTo(pos.x, pos.y);
+    lastX = pos.x;
+    lastY = pos.y;
+}
+
+// Draw function
+function draw(event) {
+    if (!isDrawing) return;
+    const pos = getMousePos(event);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastX = pos.x;
+    lastY = pos.y;
+    hasSignature = true; // Mark that canvas has content
+}
+
+// Stop drawing function
+function stopDrawing() {
+    isDrawing = false;
+    ctx.closePath();
+}
+
+// Get mouse/touch position
+function getMousePos(event) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+
+    if (event.touches) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+// Clear canvas button
+document.getElementById('clearButton').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasSignature = false; // Reset the flag
+});
+
+// Download signature button
+document.getElementById('downloadButton').addEventListener('click', () => {
+    if (!hasSignature) {
+        alert('Tidak ada tanda tangan untuk diunduh.');
+        return;
+    }
+    const link = document.createElement('a');
+    link.download = 'signature.png';
+    link.href = canvas.toDataURL();
+    link.click();
+});
+
+// Add text button
+document.getElementById('addTextButton').addEventListener('click', () => {
+    const textInput = document.getElementById('textInput').value;
+    const fontStyle = document.getElementById('fontStyle').value;
+
+    if (textInput) {
+        ctx.font = `24px ${fontStyle}`;
+        ctx.fillStyle = '#000';
+
+        // Position text below the last drawn signature point
+        const textX = Math.max(0, lastX - 20); // Ensure text does not go off the left edge
+        const textY = Math.min(canvas.height - 10, lastY + 30); // Ensure text does not go off the bottom edge
+
+        ctx.fillText(textInput, textX, textY);
+        hasSignature = true; // Mark that canvas has content
+    } else {
+        alert('Masukkan teks sebelum menambahkan.');
+    }
+});
+
+   </script>
+</body>
+</html>
