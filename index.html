@@ -17,16 +17,12 @@
 
         .container {
             text-align: center;
-            width: 100%;
-            max-width: 600px;
         }
 
         canvas {
             border: 2px solid #000;
             background-color: white;
             margin-bottom: 10px;
-            width: 100%;
-            height: auto;
         }
 
         .controls {
@@ -68,7 +64,7 @@
 
 <div class="container">
     <h1>TTD Digital</h1>
-    <canvas id="signatureCanvas"></canvas>
+    <canvas id="signatureCanvas" width="400" height="200"></canvas>
     <div class="controls">
         <label for="colorPicker">Pilih Warna:</label>
         <select id="colorPicker">
@@ -82,51 +78,43 @@
         <button id="saveButton" class="btn-save" onclick="saveSignature()" disabled>Simpan</button>
     </div>
     
-    <h2>@copyright Imandrifatur 2024</h2>
+    <h2>@copyright Imandrifatur 2024</h2
 
     <div id="message"></div>
 </div>
 
 <script>
+    // Get the canvas element and context
     const canvas = document.getElementById('signatureCanvas');
     const ctx = canvas.getContext('2d');
     const saveButton = document.getElementById('saveButton');
 
-    // Set the canvas size dynamically based on window size
-    function resizeCanvas() {
-        canvas.width = window.innerWidth * 0.8;  // 80% of the window width
-        canvas.height = window.innerHeight * 0.4; // 40% of the window height
-    }
-
     // Set the default pen color
     let penColor = document.getElementById('colorPicker').value;
 
+    // Set the drawing flag and initial positions
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
 
-    // Call resizeCanvas on window resize
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();  // Call once on page load
-
-    // Function to start drawing for mouse or touch
-    function startDrawing(e) {
+    // Function to start drawing
+    canvas.addEventListener('mousedown', (e) => {
         isDrawing = true;
-        lastX = e.offsetX || e.touches[0].clientX - canvas.offsetLeft;
-        lastY = e.offsetY || e.touches[0].clientY - canvas.offsetTop;
-    }
+        lastX = e.offsetX;
+        lastY = e.offsetY;
+    });
 
     // Function to stop drawing
-    function stopDrawing() {
+    canvas.addEventListener('mouseup', () => {
         isDrawing = false;
-    }
+    });
 
-    // Function to draw the signature for mouse or touch
-    function draw(e) {
+    // Function to draw the signature
+    canvas.addEventListener('mousemove', (e) => {
         if (!isDrawing) return;
-
-        const currentX = e.offsetX || e.touches[0].clientX - canvas.offsetLeft;
-        const currentY = e.offsetY || e.touches[0].clientY - canvas.offsetTop;
+        
+        const currentX = e.offsetX;
+        const currentY = e.offsetY;
 
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
@@ -139,10 +127,10 @@
         lastX = currentX;
         lastY = currentY;
 
-        enableSaveButton();
-    }
+        enableSaveButton();  // Enable the save button if there's drawing
+    });
 
-    // Update pen color
+    // Update pen color based on the selected color
     document.getElementById('colorPicker').addEventListener('change', (e) => {
         penColor = e.target.value;
     });
@@ -150,47 +138,39 @@
     // Clear the canvas
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('message').textContent = '';
-        disableSaveButton();
+        document.getElementById('message').textContent = ''; // Clear any error message
+        disableSaveButton();  // Disable save button if canvas is cleared
     }
 
-    // Save the signature
+    // Save the signature as an image
     function saveSignature() {
         const imageData = canvas.toDataURL('image/png');
         
+        // Check if canvas is empty
         if (imageData === "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA..." || canvas.width === 0 || canvas.height === 0) {
             document.getElementById('message').textContent = 'Tanda tangan tidak boleh kosong! Silakan gambar terlebih dahulu.';
             return;
         }
 
+        // Create a link to download the signature
         const link = document.createElement('a');
         link.href = imageData;
         link.download = 'signature.png';
         link.click();
     }
 
-    // Enable the save button
+    // Function to enable save button
     function enableSaveButton() {
         saveButton.disabled = false;
         saveButton.classList.add('enabled');
     }
 
-    // Disable the save button
+    // Function to disable save button
     function disableSaveButton() {
         saveButton.disabled = true;
         saveButton.classList.remove('enabled');
     }
 
-    // Add mouse and touch event listeners
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchmove', draw);
-    canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchcancel', stopDrawing);
 </script>
 
 </body>
