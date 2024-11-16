@@ -17,15 +17,16 @@
 
         .container {
             text-align: center;
+            width: 100%;
         }
 
-        /* Menyesuaikan ukuran canvas dengan lebar dan tinggi layar ponsel */
+        /* Ukuran canvas disesuaikan dengan layar perangkat */
         canvas {
             border: 2px solid #000;
             background-color: white;
             margin-bottom: 10px;
-            width: 90vw;  /* 90% dari lebar layar */
-            height: 40vh;  /* 40% dari tinggi layar */
+            width: 90vw;  /* 90% lebar layar */
+            height: 40vh;  /* 40% tinggi layar */
             max-width: 600px;  /* Maksimal lebar canvas */
             max-height: 300px; /* Maksimal tinggi canvas */
         }
@@ -68,9 +69,9 @@
 <body>
 
 <div class="container">
-    <h1>Digital Signature</h1>
-    <canvas id="signatureCanvas"></canvas> <!-- Ukuran canvas dinamis -->
-
+    <h1>TTD Digital</h1>
+    <canvas id="signatureCanvas"></canvas>
+    
     <div class="controls">
         <label for="colorPicker">Pilih Warna:</label>
         <select id="colorPicker">
@@ -83,10 +84,8 @@
         <button class="btn-clear" onclick="clearCanvas()">Bersihkan</button>
         <button id="saveButton" class="btn-save" onclick="saveSignature()" disabled>Simpan</button>
     </div>
-    
-    <h2>
-    @copyright Imandrifatur 2024
-    </h2>
+
+    <h2>@copyright Imandrifatur 2024</h2>
 
     <div id="message"></div>
 </div>
@@ -120,7 +119,7 @@
     // Function to draw the signature
     canvas.addEventListener('mousemove', (e) => {
         if (!isDrawing) return;
-
+        
         const currentX = e.offsetX;
         const currentY = e.offsetY;
 
@@ -153,7 +152,7 @@
     // Save the signature as an image
     function saveSignature() {
         const imageData = canvas.toDataURL('image/png');
-
+        
         // Check if canvas is empty
         if (imageData === "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA..." || canvas.width === 0 || canvas.height === 0) {
             document.getElementById('message').textContent = 'Tanda tangan tidak boleh kosong! Silakan gambar terlebih dahulu.';
@@ -179,15 +178,15 @@
         saveButton.classList.remove('enabled');
     }
 
-    // Dynamically adjust canvas size on window resize
-    window.addEventListener('resize', function() {
-        canvas.width = window.innerWidth * 0.9;  // 90% of the window width
-        canvas.height = window.innerHeight * 0.4; // 40% of the window height
+    // Set canvas size to be responsive
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth * 0.9; // Set canvas width to 90% of window width
+        canvas.height = window.innerHeight * 0.4; // Set canvas height to 40% of window height
     });
 
-    // Initialize canvas size on load
-    canvas.width = window.innerWidth * 0.9;  // 90% of the window width
-    canvas.height = window.innerHeight * 0.4; // 40% of the window height
+    // Initial resize to adjust canvas on load
+    window.dispatchEvent(new Event('resize'));
+
 </script>
 
 </body>
