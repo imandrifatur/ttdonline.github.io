@@ -39,9 +39,10 @@
             color: #666;
         }
 
-        input[type="text"] {
+        input[type="color"] {
             padding: 8px;
-            width: 200px;
+            width: 40px;
+            height: 40px;
         }
     </style>
 </head>
@@ -50,8 +51,8 @@
     <div class="signature-container">
         <canvas id="signatureCanvas"></canvas>
     </div>
-    <input type="text" id="nameInput" placeholder="Masukkan nama Anda">
-    <button id="addNameButton">Tambahkan Nama</button>
+    <label for="textColor">Pilih warna tulisan:</label>
+    <input type="color" id="textColor" value="#000000">
     <button id="clearButton">Clear</button>
     <button id="downloadButton" disabled>Download</button>
     <h2>@copy 2024 imandrifatur</h2>
@@ -152,21 +153,10 @@
             link.click();
         });
 
-        document.getElementById('addNameButton').addEventListener('click', () => {
-            const name = document.getElementById('nameInput').value;
-            if (!name) {
-                alert('Masukkan nama sebelum menambahkan.');
-                return;
-            }
-            ctx.font = '18px Arial';
-            ctx.fillStyle = '#000';
-
-            // Posisi nama di bawah tanda tangan (disesuaikan)
-            const textX = lastX - 20; // Sesuaikan agar nama muncul sedikit ke kiri
-            const textY = lastY + 30; // Sesuaikan agar nama muncul di bawah
-            const adjustedY = textY > canvas.height ? canvas.height - 10 : textY; // Pastikan tidak keluar batas
-            ctx.fillText(name, textX, adjustedY);
-            hasSignature = true; // Tandai bahwa canvas memiliki konten
+        // Mengambil warna dari input warna
+        const textColorPicker = document.getElementById('textColor');
+        textColorPicker.addEventListener('input', (e) => {
+            ctx.strokeStyle = e.target.value; // Mengubah warna drawing
         });
     </script>
 </body>
